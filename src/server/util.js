@@ -1,7 +1,8 @@
-const { ID_COOKIE } = require("./idMiddleware");
+const { ID_COOKIE } = require('./idMiddleware');
 
-exports.getUserId = (req) => {
-  return req.cookies[ID_COOKIE];
+exports.getUserId = (res) => {
+  console.log(res);
+  return res.locals.userId;
 };
 
 exports.exchangeDto = (userId, exchange) => {
@@ -20,6 +21,6 @@ exports.exchangeDto = (userId, exchange) => {
         };
 
   return isComplete
-    ? { status: "complete", ...messages }
-    : { status: "pending", userMessage: messages.userMessage };
+    ? { status: 'complete', ...messages }
+    : { status: 'pending', userMessage: messages.userMessage };
 };

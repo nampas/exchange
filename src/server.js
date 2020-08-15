@@ -2,6 +2,7 @@ const express = require('express');
 const pageController = require('./server/pageController');
 const apiController = require('./server/apiController');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const { handler: idMiddleware } = require('./server/idMiddleware');
 
 const PORT = 3000;
@@ -11,29 +12,22 @@ app.set('view engine', 'ejs');
 app.set('views', './src/views');
 app.use('/assets', express.static('src/client'));
 app.use(cookieParser());
+app.use(bodyParser.json());
 
-// set client id if necessary
+// set the user id
 app.use(idMiddleware);
 
 // homepage
-app.get('/', (req, res) => {
-  pageController.index(req, res);
-});
+app.get('/', pageController.index);
 
-// view exchange
-app.get('/ex/:exchangeId', (req, res) => {
-  pageController.exchange(req, res);
-});
+// view an exchange
+app.get('/ex/:exchangeId', pageController.exchange)
 
 // update an exchange
-app.put('/ex/:exchangeId', (req, res) => {
-  apiController.updateExchange(req, res);
-});
+app.put('/ex/:exchangeId', apiController.updateExchange);
 
 // create an exchange
-app.post('/ex', (req, res) => {
-  apiController.createExchange(req, res);
-});
+app.post('/ex', apiController.createExchange);
 
 app.listen(PORT, () => {
   console.log(`exchange listening at http://localhost:${PORT}`);

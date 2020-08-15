@@ -5,12 +5,15 @@
     <%- include('header'); -%>
     <% if(exchange.status === 'complete') { %>
       <h3>Exchange is complete!</h3>
-
       <h4>You said:</h4>
       <p><%= exchange.userMessage %></p>
       <h4>The other participant said:</h4>
       <p><%= exchange.correspondantMessage %></p>
-    <% } else { %>  
+    <% } else if (exchange.userMessage) { %>
+      <h3>Waiting for participant to respond</h3>
+      <h4>You said:</h4>
+      <p><%= exchange.userMessage %></p>
+    <% } else { %>
       <h3>Exchange is incomplete!</h3>
       <textarea id="message"></textarea>
       <button id="submit">Submit your Message</button>

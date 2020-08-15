@@ -7,7 +7,7 @@ exports.index = (req, res) => {
 
 exports.exchange = (req, res) => {
   const { exchangeId } = req.params;
-  const userId = getUserId(req);
+  const userId = getUserId(res);
   const exchange = getExchange(exchangeId);
 
   if (!exchange) {
