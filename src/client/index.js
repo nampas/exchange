@@ -1,5 +1,5 @@
 const createExchange = () => {
-  fetch('/exchange', { method: 'POST' }).then((res) => {
+  fetch('/ex', { method: 'POST' }).then((res) => {
     if (res.status == 200) {
       res.json().then(({ url }) => (window.location = url));
     } else {

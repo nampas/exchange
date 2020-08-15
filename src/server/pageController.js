@@ -1,17 +1,37 @@
-const { v4: uuidv4 } = require('uuid');
-
-const ID_HEADER = 'client-id';
+const { getExchange } = require('./dataStore');
+const { getUserId, exchangeDto } = require('./util');
 
 exports.index = (req, res) => {
-  setClientId(req, res);
   res.render('index', { title: 'Exchange', script: 'index' });
 };
 
-exports.exchange = (req, res) => {};
+exports.exchange = (req, res) => {
+  const { exchangeId } = req.params;
+  const userId = getUserId(req);
+  const exchange = getExchange(exchangeId);
 
-// Set client id if there isn't one
-const setClientId = (req, res) => {
-  if (!req.cookies[ID_HEADER]) {
-    res.cookie(ID_HEADER, uuidv4());
+  if (!exchange) {
+    res.status(404).send();
+  } else if (!userIsAuthorized(userId, exchange)) {
+    res.status(403).send();
+  } else {
+    const dto = exchangeDto(userId, exchange);
+    res.render('exchange', {
+      title: 'Exchange',
+      script: 'exchange',
+      exchange: dto,
+    });
   }
+};
+
+const userIsAuthorized = (userId, exchange) => {
+  if (!userId) {
+    return false;
+  }
+
+  // User can access if they're on the exchange already, or if there's still
+  // an empty spot on the exchange.
+  return [exchange.creator, exchange.participant].some(
+    (id) => !id || id === userId
+  );
 };

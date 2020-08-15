@@ -21,17 +21,17 @@ app.get('/', (req, res) => {
 });
 
 // view exchange
-app.get('/{exchangeId}', (req, res) => {
+app.get('/ex/:exchangeId', (req, res) => {
   pageController.exchange(req, res);
 });
 
 // update an exchange
-app.put('/{exchangeId}', (req, res) => {
+app.put('/ex/:exchangeId', (req, res) => {
   apiController.updateExchange(req, res);
 });
 
 // create an exchange
-app.post('/exchange', (req, res) => {
+app.post('/ex', (req, res) => {
   apiController.createExchange(req, res);
 });
 
