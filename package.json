@@ -1,0 +1,23 @@
+{
+  "name": "exchange",
+  "version": "1.0.0",
+  "description": "Reveal messages simultaneously",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nampas/exchange.git"
+  },
+  "author": "Nathan Pastor",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nampas/exchange/issues"
+  },
+  "homepage": "https://github.com/nampas/exchange#readme",
+  "dependencies": {
+    "aws-sdk": "^2.734.0",
+    "express": "^4.17.1"
+  }
+}
