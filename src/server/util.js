@@ -1,7 +1,6 @@
 const { ID_COOKIE } = require('./idMiddleware');
 
 exports.getUserId = (res) => {
-  console.log(res);
   return res.locals.userId;
 };
 
@@ -20,7 +19,12 @@ exports.exchangeDto = (userId, exchange) => {
           correspondantMessage: exchange.creatorMessage,
         };
 
+  const result = {
+    prompt: exchange.prompt,
+    status: isComplete ? 'complete' : 'messages',
+  };
+
   return isComplete
-    ? { status: 'complete', ...messages }
-    : { status: 'pending', userMessage: messages.userMessage };
+    ? { ...result, ...messages }
+    : { ...result, userMessage: messages.userMessage };
 };

@@ -15,9 +15,10 @@ exports.updateExchange = async (req, res) => {
 };
 
 exports.createExchange = async (req, res) => {
-  console.log(res);
-  console.log(res.locals);
-  const exchangeId = await dataStore.createExchange(getUserId(res));
+  const exchangeId = await dataStore.createExchange(
+    getUserId(res),
+    req.body.prompt
+  );
 
   res.json({ url: `/ex/${exchangeId}` });
 };

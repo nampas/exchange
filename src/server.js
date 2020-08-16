@@ -21,7 +21,7 @@ app.use(idMiddleware);
 app.get('/', pageController.index);
 
 // view an exchange
-app.get('/ex/:exchangeId', pageController.exchange)
+app.get('/ex/:exchangeId', pageController.exchange);
 
 // update an exchange
 app.put('/ex/:exchangeId', apiController.updateExchange);

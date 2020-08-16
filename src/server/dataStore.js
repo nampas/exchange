@@ -2,11 +2,9 @@ const { v4: uuidv4 } = require('uuid');
 
 const tempDataStore = {};
 
-exports.createExchange = (userId) => {
+exports.createExchange = (userId, prompt) => {
   const exchangeId = uuidv4();
-  tempDataStore[exchangeId] = {
-    creator: userId,
-  };
+  tempDataStore[exchangeId] = { creator: userId, prompt };
   return exchangeId;
 };
 
