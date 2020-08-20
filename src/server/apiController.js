@@ -22,3 +22,8 @@ exports.createExchange = async (req, res) => {
 
   res.json({ url: `/ex/${exchangeId}` });
 };
+
+exports.clearExchanges = async (req, res) => {
+  const numRemoved = await dataStore.clearExchanges();
+  res.json({ status: 'success', removed: numRemoved });
+};

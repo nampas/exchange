@@ -1,34 +1,56 @@
 const express = require('express');
-const pageController = require('./server/pageController');
-const apiController = require('./server/apiController');
-const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const { default: migrationRunner } = require('node-pg-migrate');
+const apiController = require('./server/apiController');
+const pageController = require('./server/pageController');
 const { handler: idMiddleware } = require('./server/idMiddleware');
 
 const PORT = 3000;
 
-const app = express();
-app.set('view engine', 'ejs');
-app.set('views', './src/views');
-app.use('/assets', express.static('src/client'));
-app.use(cookieParser());
-app.use(bodyParser.json());
+const initApp = () => {
+  const app = express();
 
-// set the user id
-app.use(idMiddleware);
+  app.set('view engine', 'ejs');
+  app.set('views', './src/views');
+  app.use('/assets', express.static('src/client'));
+  app.use(cookieParser());
+  app.use(bodyParser.json());
 
-// homepage
-app.get('/', pageController.index);
+  // set the user id
+  app.use(idMiddleware);
 
-// view an exchange
-app.get('/ex/:exchangeId', pageController.exchange);
+  // homepage
+  app.get('/', pageController.index);
 
-// update an exchange
-app.put('/ex/:exchangeId', apiController.updateExchange);
+  // view an exchange
+  app.get('/ex/:exchangeId', pageController.exchange);
 
-// create an exchange
-app.post('/ex', apiController.createExchange);
+  // update an exchange
+  app.put('/ex/:exchangeId', apiController.updateExchange);
 
-app.listen(PORT, () => {
-  console.log(`exchange listening at http://localhost:${PORT}`);
+  // create an exchange
+  app.post('/ex', apiController.createExchange);
+
+  // clear all exchanges. this will of course be removed in a real version of the app
+  app.delete('/ex', apiController.clearExchanges);
+
+  return app;
+};
+
+const migrateDb = async () => {
+  return migrationRunner({
+    // Don't include the db name
+    databaseUrl: process.env.DATABASE_URL,
+    dir: 'src/migrations',
+    verbose: true,
+    migrationsTable: 'migrations',
+    direction: 'up',
+  });
+};
+
+Promise.allSettled(migrateDb(), initApp()).then(([db, app]) => {
+  app.listen(PORT, () => {
+    console.log(`exchange listening at http://localhost:${PORT}`);
+  });
 });

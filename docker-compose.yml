@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://exchange_app:dev10pw@postgres/exchange
+  postgres:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_USER: exchange_app
+      POSTGRES_PASSWORD: dev10pw
+      POSTGRES_DB: exchange
