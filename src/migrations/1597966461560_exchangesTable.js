@@ -3,8 +3,9 @@
 exports.up = (pgm) => {
   pgm.createTable('exchanges', {
     id: 'id',
-    prompt: { type: 'text', notNull: true },
+    prompt: { type: 'text' },
     creator: { type: 'uuid', notNull: true },
+    externalId: { type: 'varchar(40)', notNull: true },
     createdAt: {
       type: 'timestamp',
       notNull: true,
@@ -16,13 +17,9 @@ exports.up = (pgm) => {
       default: pgm.func('current_timestamp'),
     },
   });
-  pgm.createTable('exchange_messages', {
+  pgm.createTable('exchangeMessages', {
     id: 'id',
-    exchangeId: {
-      type: 'integer',
-      notNull: true,
-      references: '"exchanges"',
-    },
+    exchangeId: { type: 'varchar(40)', notNull: true },
     author: { type: 'uuid', notNull: true },
     message: { type: 'text', notNull: true },
     createdAt: {
@@ -39,6 +36,6 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('exchange.exchange_messages');
-  pgm.dropTable('exchange.exchanges');
+  pgm.dropTable('exchangeMessages');
+  pgm.dropTable('exchanges');
 };

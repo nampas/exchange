@@ -4,27 +4,21 @@ exports.getUserId = (res) => {
   return res.locals.userId;
 };
 
-exports.exchangeDto = (userId, exchange) => {
-  const isComplete = exchange.creatorMessage && exchange.participantMessage;
+exports.exchangeDto = (userId, { exchange, messages }) => {
+  const isComplete = messages.length >= 2;
 
-  // Don't leak the participant's user id
-  const messages =
-    userId === exchange.creator
-      ? {
-          userMessage: exchange.creatorMessage,
-          correspondantMessage: exchange.participantMessage,
-        }
-      : {
-          userMessage: exchange.participantMessage,
-          correspondantMessage: exchange.creatorMessage,
-        };
+  const dtoMessages = messages.reduce((acc, m) => {
+    if (m.author === userId) {
+      acc.userMessage = m.message;
+    } else {
+      acc.correspondantMessage = m.message;
+    }
+    return acc;
+  }, {});
 
-  const result = {
+  return {
     prompt: exchange.prompt,
     status: isComplete ? 'complete' : 'messages',
+    ... (isComplete ? dtoMessages : { userMessage: dtoMessages.userMessage })
   };
-
-  return isComplete
-    ? { ...result, ...messages }
-    : { ...result, userMessage: messages.userMessage };
 };

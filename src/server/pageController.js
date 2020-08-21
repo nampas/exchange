@@ -1,14 +1,15 @@
-const { getExchange } = require('./dataStore');
+const { getExchangeAndMessages } = require('./dataStore');
 const { getUserId, exchangeDto } = require('./util');
 
 exports.index = (req, res) => {
   res.render('index', { title: 'Exchange', script: 'index' });
 };
 
-exports.exchange = (req, res) => {
+exports.exchange = async (req, res) => {
   const { exchangeId } = req.params;
   const userId = getUserId(res);
-  const exchange = getExchange(exchangeId);
+  const exchange = await getExchangeAndMessages(exchangeId);
+  console.log(exchange);
 
   if (!exchange) {
     res.status(404).send();
@@ -16,6 +17,7 @@ exports.exchange = (req, res) => {
     res.status(403).send();
   } else {
     const dto = exchangeDto(userId, exchange);
+    console.log(dto);
     res.render('exchange', {
       title: 'Exchange',
       script: 'exchange',
@@ -24,14 +26,20 @@ exports.exchange = (req, res) => {
   }
 };
 
-const userIsAuthorized = (userId, exchange) => {
+const userIsAuthorized = (userId, { exchange, messages }) => {
   if (!userId) {
     return false;
   }
 
-  // User can access if they're on the exchange already, or if there's still
-  // an empty spot on the exchange.
-  return [exchange.creator, exchange.participant].some(
-    (id) => !id || id === userId
-  );
+  if (messages.length < 2) {
+    // Anyone can access if the exchange isn't finished
+    return true;
+  }
+
+  if (exchange.creator === userId) {
+    return true;
+  }
+
+  // Check if user is a participant
+  return messages.map(({ author }) => author).some((id) => id === userId);
 };

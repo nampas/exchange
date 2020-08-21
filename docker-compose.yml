@@ -11,6 +11,8 @@ services:
       DATABASE_URL: postgres://exchange_app:dev10pw@postgres/exchange
   postgres:
     image: postgres:11-alpine
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: exchange_app
       POSTGRES_PASSWORD: dev10pw

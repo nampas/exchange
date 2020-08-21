@@ -1,36 +1,103 @@
 const { v4: uuidv4 } = require('uuid');
+const camelize = require('camelize');
+const { query, connect, release } = require('./db');
 
 const tempDataStore = {};
 
-exports.createExchange = (userId, prompt) => {
+const QUERIES = {
+  EXCHANGES: {
+    GET: 'select * from exchanges where external_id = $1',
+    GET_COMPLETE:
+      'select * from exchanges e left join exchange_messages em on em.exchange_id = e.external_id where e.external_id = $1',
+    CREATE:
+      'insert into exchanges(prompt, creator, external_id) values ($1, $2, $3) returning *',
+  },
+  MESSAGES: {
+    CREATE:
+      'insert into exchange_messages(exchange_id, author, message) values ($1, $2, $3) returning *',
+  },
+};
+
+const doQuery = async (client, ...args) => {
+  // If there's a client, use its query method. Otherwise use the pool's one
+  const fn = client ? client.query.bind(client) : query;
+  const result = await fn(...args);
+
+  if (result.command === 'SELECT') {
+    return camelize(result.rows);
+  }
+  if (result.command === 'INSERT') {
+    return result.rowCount;
+  }
+
+  return result;
+};
+
+const createExchange = async (userId, prompt, client) => {
   const exchangeId = uuidv4();
-  tempDataStore[exchangeId] = { creator: userId, prompt };
+  await doQuery(client, QUERIES.EXCHANGES.CREATE, [prompt, userId, exchangeId]);
   return exchangeId;
 };
 
-exports.getExchange = (exchangeId) => {
-  return tempDataStore[exchangeId] || null;
+const getExchange = async (exchangeId, client) => {
+  return doQuery(client, QUERIES.EXCHANGES.GET, [exchangeId]);
 };
 
-exports.updateExchange = (exchangeId, userId, message) => {
-  const exchange = tempDataStore[exchangeId];
-  if (!exchange) {
+const getExchangeAndMessages = async (exchangeId, client) => {
+  const result = await doQuery(client, QUERIES.EXCHANGES.GET_COMPLETE, [
+    exchangeId,
+  ]);
+  if (!result || !result.length) {
     return null;
   }
 
-  if (exchange.creator === userId) {
-    // creator is submitting their message
-    exchange.creatorMessage = message;
-  } else if (!exchange.participant) {
-    // participant is submitting their message
-    exchange.participant = userId;
-    exchange.participantMessage = message;
-  } else {
-    // the exchange has already been filled out
-    throw new Error(
-      `Cant update exchange ${exchangeId}, it's already complete`
-    );
-  }
-
-  return exchange;
+  return {
+    exchange: {
+      id: result[0].id,
+      prompt: result[0].prompt,
+      externalId: result[0].externalId,
+      creator: result[0].creator,
+    },
+    messages: result.filter(({ author }) => author).map((r) => ({
+      author: r.author,
+      message: r.message,
+    })),
+  };
 };
+
+const updateExchange = async (exchangeId, userId, message, c) => {
+  let client = null;
+  try {
+    client = c || (await connect());
+
+    const exchange = await getExchangeAndMessages(exchangeId, client);
+    if (!exchange) {
+      return null;
+    }
+
+    if (exchange.messages.length > 1) {
+      // the exchange has already been filled out
+      throw new Error(
+        `Cant update exchange ${exchangeId}, it's already complete`
+      );
+    }
+
+    await doQuery(client, QUERIES.MESSAGES.CREATE, [
+      exchangeId,
+      userId,
+      message,
+    ]);
+    exchange.messages.push({ author: userId, message });
+    return exchange;
+  } finally {
+    // Release only if we made the client
+    if (client && !c) {
+      release(client);
+    }
+  }
+};
+
+exports.createExchange = createExchange;
+exports.updateExchange = updateExchange;
+exports.getExchange = getExchange;
+exports.getExchangeAndMessages = getExchangeAndMessages;

@@ -5,6 +5,7 @@ const { default: migrationRunner } = require('node-pg-migrate');
 const apiController = require('./server/apiController');
 const pageController = require('./server/pageController');
 const { handler: idMiddleware } = require('./server/idMiddleware');
+const { initConnectionPool } = require('./server/db');
 
 const PORT = 3000;
 
@@ -40,17 +41,23 @@ const initApp = () => {
 
 const migrateDb = async () => {
   return migrationRunner({
-    // Don't include the db name
     databaseUrl: process.env.DATABASE_URL,
     dir: 'src/migrations',
     verbose: true,
     migrationsTable: 'migrations',
     direction: 'up',
+    decamelize: true,
   });
 };
 
-Promise.allSettled(migrateDb(), initApp()).then(([db, app]) => {
-  app.listen(PORT, () => {
-    console.log(`exchange listening at http://localhost:${PORT}`);
+migrateDb()
+  .then(initConnectionPool)
+  .then(initApp)
+  .then((app) => {
+    app.listen(PORT, () => {
+      console.log(`exchange listening at http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.log('Failed to initialize app', error);
   });
-});
