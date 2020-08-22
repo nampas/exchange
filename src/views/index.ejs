@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html>
   <%- include('meta', { title, script }); -%>
-  <body>
-    <%- include('header'); -%>
-
-    <p>Prompt:</p>
-    <textarea id="prompt"></textarea>
-    <button id="create">Create an Exchange</button>
-    <%- include('footer'); -%>
+  <body class="bg-light">
+    <div class="wrapper">
+      <%- include('header'); -%>
+      <div class="container-sm shadow mt-5 p-3 w-50 bg-white">
+        <form>
+          <div class="form-group">
+            <textarea id="prompt" class="form-control" rows="3" placeholder="Enter prompt"></textarea>
+          </div>
+          <button id="create" type="submit" class="btn btn-primary">Create</button>
+        </form>
+      </div>
+      <%- include('footer'); -%>
+    </div>
   </body>
 </html>

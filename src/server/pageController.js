@@ -9,7 +9,6 @@ exports.exchange = async (req, res) => {
   const { exchangeId } = req.params;
   const userId = getUserId(res);
   const exchange = await getExchangeAndMessages(exchangeId);
-  console.log(exchange);
 
   if (!exchange) {
     res.status(404).send();
@@ -17,7 +16,6 @@ exports.exchange = async (req, res) => {
     res.status(403).send();
   } else {
     const dto = exchangeDto(userId, exchange);
-    console.log(dto);
     res.render('exchange', {
       title: 'Exchange',
       script: 'exchange',

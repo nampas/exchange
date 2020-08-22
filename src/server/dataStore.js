@@ -1,8 +1,8 @@
-const { v4: uuidv4 } = require('uuid');
+const randomstring = require('randomstring');
 const camelize = require('camelize');
 const { query, connect, release } = require('./db');
 
-const tempDataStore = {};
+const EXCHANGE_ID_PARAMS = { length: 12, charset: 'alphanumeric' };
 
 const QUERIES = {
   EXCHANGES: {
@@ -34,7 +34,7 @@ const doQuery = async (client, ...args) => {
 };
 
 const createExchange = async (userId, prompt, client) => {
-  const exchangeId = uuidv4();
+  const exchangeId = randomstring.generate(EXCHANGE_ID_PARAMS);
   await doQuery(client, QUERIES.EXCHANGES.CREATE, [prompt, userId, exchangeId]);
   return exchangeId;
 };
@@ -58,10 +58,12 @@ const getExchangeAndMessages = async (exchangeId, client) => {
       externalId: result[0].externalId,
       creator: result[0].creator,
     },
-    messages: result.filter(({ author }) => author).map((r) => ({
-      author: r.author,
-      message: r.message,
-    })),
+    messages: result
+      .filter(({ author }) => author)
+      .map((r) => ({
+        author: r.author,
+        message: r.message,
+      })),
   };
 };
 
@@ -75,12 +77,7 @@ const updateExchange = async (exchangeId, userId, message, c) => {
       return null;
     }
 
-    if (exchange.messages.length > 1) {
-      // the exchange has already been filled out
-      throw new Error(
-        `Cant update exchange ${exchangeId}, it's already complete`
-      );
-    }
+    validateUpdate(exchange, userId, exchangeId);
 
     await doQuery(client, QUERIES.MESSAGES.CREATE, [
       exchangeId,
@@ -94,6 +91,26 @@ const updateExchange = async (exchangeId, userId, message, c) => {
     if (client && !c) {
       release(client);
     }
+  }
+};
+
+const validateUpdate = ({ messages, exchange }, userId, exchangeId) => {
+  if (messages.length > 1) {
+    // the exchange has already been filled out
+    throw new Error(
+      `Cant update exchange ${exchangeId}, it's already complete`
+    );
+  }
+  if (
+    messages.length === 1 &&
+    messages[0].author !== userId &&
+    userId !== exchange.creator
+  ) {
+    // If there's already one message authored by someone else, then the 2nd
+    // message needs to be authored by the creator
+    throw new Error(
+      `At least one message for ${exchangeId} must be authored by the creator`
+    );
   }
 };
 

@@ -1,5 +1,11 @@
-const createExchange = () => {
+const createExchange = (e) => {
+  e.preventDefault();
+
   var prompt = document.getElementById('prompt').value;
+  if (!prompt || !prompt.trim().length) {
+    return;
+  }
+
   var opts = {
     method: 'POST',
     body: JSON.stringify({ prompt }),

@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html>
   <%- include('meta', { title, script }); -%>
-  <body>
-    <%- include('header'); -%>
-    <% if(exchange.status === 'complete') { %>
-      <h3>Exchange is complete!</h3>
-      <h4>Prompt:</h4>
-      <p><%= exchange.prompt %></p>
-      <h4>You said:</h4>
-      <p><%= exchange.userMessage %></p>
-      <h4>The other participant said:</h4>
-      <p><%= exchange.correspondantMessage %></p>
-    <% } else if (exchange.userMessage) { %>
-      <h3>Waiting for participant to respond</h3>
-      <h4>Prompt:</h4>
-      <p><%= exchange.prompt %></p>
-      <h4>You said:</h4>
-      <p><%= exchange.userMessage %></p>
-    <% } else { %>
-      <h3>Exchange is incomplete!</h3>
-      <h4>Prompt:</h4>
-      <p><%= exchange.prompt %></p>
-      <textarea id="message"></textarea>
-      <button id="submit">Submit your Message</button>
-    <% } %>
-    <%- include('footer'); -%>
+  <body class="bg-light">
+    <div class="wrapper bg-light">
+      <%- include('header'); -%>
+      <div class="container-sm exchange-content shadow mt-5 p-3 w-50 bg-white">
+        <% if(exchange.status === 'complete') { %>
+          <h4>Exchange is complete</h4>
+          <p><%= exchange.prompt %></p>
+          <div class="mesage">
+            <h5>You said:</h5>
+            <textarea class="form-control read-only" readonly><%= exchange.userMessage %></textarea>
+          </div>
+          <div class="message pt-3">
+          <h5>The other participant said:</h5>
+          <textarea class="form-control read-only" readonly><%= exchange.correspondantMessage %></textarea>
+          </div>
+        <% } else if (exchange.userMessage) { %>
+          <h4>Waiting for participant to respond</h4>
+          <p><%= exchange.prompt %></p>
+          <h5>You said:</h5>
+          <textarea class="form-control read-only" readonly><%= exchange.userMessage %></textarea>
+        <% } else { %>
+          <h4>Awaiting responses</h4>
+          <p><%= exchange.prompt %></p>
+          <form>
+            <div class="form-group">
+              <textarea id="message" class="form-control" rows="3" placeholder="Enter your response"></textarea>
+            </div>
+            <button id="submit" type="submit" class="btn btn-primary">Submit Response</button>
+          </form>
+        <% } %>
+        <%- include('copyUrl'); %>
+      </div>
+      <%- include('footer'); -%>
+    </div>
   </body>
 </html>

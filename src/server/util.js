@@ -19,6 +19,6 @@ exports.exchangeDto = (userId, { exchange, messages }) => {
   return {
     prompt: exchange.prompt,
     status: isComplete ? 'complete' : 'messages',
-    ... (isComplete ? dtoMessages : { userMessage: dtoMessages.userMessage })
+    ...(isComplete ? dtoMessages : { userMessage: dtoMessages.userMessage }),
   };
 };
