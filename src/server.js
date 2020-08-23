@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const { default: migrationRunner } = require('node-pg-migrate');
 const apiController = require('./server/apiController');
 const pageController = require('./server/pageController');
-const { handler: idMiddleware } = require('./server/idMiddleware');
+const { idHandler, errorHandler } = require('./server/middleware');
 const { initConnectionPool } = require('./server/db');
 
 const PORT = 3000;
@@ -19,22 +19,21 @@ const initApp = () => {
   app.use(bodyParser.json());
 
   // set the user id
-  app.use(idMiddleware);
+  app.use(idHandler);
 
   // homepage
-  app.get('/', pageController.index);
+  app.get('/', errorHandler(pageController.index));
 
   // view an exchange
-  app.get('/ex/:exchangeId', pageController.exchange);
+  app.get('/ex/:exchangeId', errorHandler(pageController.exchange));
 
   // update an exchange
-  app.put('/ex/:exchangeId', apiController.updateExchange);
+  app.put('/ex/:exchangeId', errorHandler(apiController.updateExchange));
 
   // create an exchange
-  app.post('/ex', apiController.createExchange);
+  app.post('/ex', errorHandler(apiController.createExchange));
 
-  // clear all exchanges. this will of course be removed in a real version of the app
-  app.delete('/ex', apiController.clearExchanges);
+  app.get('/internal/status', errorHandler(apiController.healthCheck));
 
   return app;
 };

@@ -37,10 +37,15 @@ const ifElementExists = (element, fn) => {
 window.addEventListener('load', () => {
   var href = window.location.href;
 
-  var urlText = ifElementExists('urlText', (el) => el.value = href);
-  ifElementExists('submit', (el) => el.addEventListener('click', submitMessage));
-  ifElementExists('copyUrl', (el) => el.addEventListener('click', () => copyFrom(urlText)));
+  var urlText = ifElementExists('urlText', (el) => (el.value = href));
+  ifElementExists('submit', (el) =>
+    el.addEventListener('click', submitMessage)
+  );
+  ifElementExists('copyUrl', (el) =>
+    el.addEventListener('click', () => copyFrom(urlText))
+  );
   ifElementExists('sendEmail', (el) => {
-    el.href = "mailto:abc@example.com?subject=Answer this exchange!&body=" + href;
+    el.href =
+      'mailto:abc@example.com?subject=Answer this exchange!&body=' + href;
   });
 });

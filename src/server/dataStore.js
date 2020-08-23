@@ -101,17 +101,6 @@ const validateUpdate = ({ messages, exchange }, userId, exchangeId) => {
       `Cant update exchange ${exchangeId}, it's already complete`
     );
   }
-  if (
-    messages.length === 1 &&
-    messages[0].author !== userId &&
-    userId !== exchange.creator
-  ) {
-    // If there's already one message authored by someone else, then the 2nd
-    // message needs to be authored by the creator
-    throw new Error(
-      `At least one message for ${exchangeId} must be authored by the creator`
-    );
-  }
 };
 
 exports.createExchange = createExchange;

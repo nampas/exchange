@@ -1,4 +1,4 @@
-const { ID_COOKIE } = require('./idMiddleware');
+const { ID_COOKIE } = require('./middleware');
 
 exports.getUserId = (res) => {
   return res.locals.userId;
