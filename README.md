@@ -2,8 +2,6 @@
 
 Reveal messages simultaneously
 
-[See it in action here](http://exchange-public-lb-115446130.us-east-1.elb.amazonaws.com/)
-
 ## What?
 
 Frequently, a discussion might go something like this:
